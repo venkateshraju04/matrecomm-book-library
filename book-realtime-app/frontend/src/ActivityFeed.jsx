@@ -8,8 +8,8 @@ import socket from './socket';
 const MAX_EVENTS = 20;
 
 const EVENT_META = {
-  BOOK_ADDED:   { icon: '📚', label: 'Book added',   color: 'bg-indigo-50 text-indigo-600' },
-  BOOK_UPDATED: { icon: '✏️',  label: 'Book updated', color: 'bg-amber-50 text-amber-600'   },
+  BOOK_ADDED:   { icon: '📚', label: 'Book added',   color: 'bg-emerald-50 text-emerald-600 ring-1 ring-emerald-200' },
+  BOOK_UPDATED: { icon: '✏️',  label: 'Book updated', color: 'bg-amber-50 text-amber-600 ring-1 ring-amber-200'   },
 };
 
 function ActivityFeed() {
@@ -28,7 +28,7 @@ function ActivityFeed() {
     new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
   return (
-    <section className="rounded-xl border border-slate-200 bg-white shadow-sm">
+    <section className="rounded-xl border border-slate-200 bg-white shadow-sm transition-shadow duration-200 hover:shadow-md">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
         <div className="flex items-center gap-2">
@@ -57,10 +57,10 @@ function ActivityFeed() {
               return (
                 <li
                   key={idx}
-                  className="animate-fade-slide-in flex items-start gap-3 border-b border-slate-50 py-3 last:border-0"
+                  className="animate-fade-slide-in flex items-start gap-3 rounded-lg border-b border-slate-50 py-3 px-1 last:border-0 transition-colors duration-150 hover:bg-slate-50/60"
                 >
                   {/* Icon */}
-                  <span className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-xs ${meta.color}`}>
+                  <span className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-sm shadow-sm ${meta.color}`}>
                     {meta.icon}
                   </span>
 

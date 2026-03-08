@@ -36,7 +36,7 @@ function AddBook() {
   };
 
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition-shadow duration-200 hover:shadow-md">
       {/* Section header */}
       <div className="mb-5 flex items-center gap-2">
         <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 text-sm">
@@ -84,7 +84,7 @@ function AddBook() {
         <button
           type="submit"
           disabled={loading}
-          className="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 active:scale-[0.97] disabled:opacity-60 disabled:pointer-events-none"
+          className="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-gradient-to-r from-indigo-600 to-blue-500 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-indigo-200/50 transition-all duration-200 hover:shadow-lg hover:shadow-indigo-300/50 hover:-translate-y-0.5 active:scale-[0.97] active:translate-y-0 disabled:opacity-60 disabled:pointer-events-none"
         >
           {loading ? (
             <>

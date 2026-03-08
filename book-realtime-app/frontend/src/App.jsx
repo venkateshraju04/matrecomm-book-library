@@ -19,6 +19,7 @@ function App() {
   const [isConnected, setIsConnected] = useState(socket.connected);
   const [usersOnline, setUsersOnline] = useState(0);
   const [fetchError, setFetchError]   = useState('');
+  const [loading, setLoading]         = useState(true);
 
   /* Load initial books */
   useEffect(() => {
@@ -28,7 +29,8 @@ function App() {
       .catch((err) => {
         console.error('[app] Failed to fetch books:', err.message);
         setFetchError('Could not load books. Is the backend running on port 5001?');
-      });
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   /* Real-time Socket.IO listeners */
@@ -55,7 +57,7 @@ function App() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30">
       {/* ── Sticky top bar ──────────────────────────────────────────── */}
       <header className="sticky top-0 z-30 border-b border-slate-200/70 bg-white/80 backdrop-blur-lg">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
@@ -108,7 +110,7 @@ function App() {
           {/* Left column: form + book list */}
           <div className="flex flex-col gap-8">
             <AddBook />
-            <BookList books={books} />
+            <BookList books={books} loading={loading} />
           </div>
 
           {/* Right sidebar: status + activity */}
