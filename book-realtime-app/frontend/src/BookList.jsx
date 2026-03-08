@@ -1,16 +1,6 @@
 /**
- * src/BookList.js — Displays all books and provides inline edit functionality.
- *
- * Flow for editing a book:
- *   1. User clicks "Edit" on a row → form fields appear inline.
- *   2. User edits title/author and clicks "Save".
- *   3. A PUT request is sent to the REST API.
- *   4. The backend updates the book in memory, then emits "bookUpdated".
- *   5. App.js receives "bookUpdated" and updates the React state.
- *
- * As with AddBook, the component does NOT update state optimistically after
- * the PUT — that guarantee comes from the socket listener in App.js so
- * all connected tabs (including the editor's own tab) stay in sync.
+ * src/BookList.jsx — Linear/GitHub-style book list with inline editing.
+ * All real-time updates come through socket events handled by App.jsx.
  */
 import React, { useState } from 'react';
 import axios from 'axios';
@@ -18,42 +8,35 @@ import axios from 'axios';
 const API_URL = 'http://localhost:5001/books';
 
 function BookList({ books }) {
-  // Track which book row is currently being edited
-  const [editingId, setEditingId]   = useState(null);
-  const [editForm, setEditForm]       = useState({ title: '', author: '' });
-  const [editError, setEditError]     = useState('');
-  const [savingId, setSavingId]       = useState(null);
+  const [editingId, setEditingId] = useState(null);
+  const [editForm, setEditForm]   = useState({ title: '', author: '' });
+  const [editError, setEditError] = useState('');
+  const [savingId, setSavingId]   = useState(null);
 
-  // Enter edit mode for a specific book
   const startEdit = (book) => {
     setEditingId(book.id);
     setEditForm({ title: book.title, author: book.author });
     setEditError('');
   };
 
-  // Cancel edit without saving
   const cancelEdit = () => {
     setEditingId(null);
     setEditForm({ title: '', author: '' });
     setEditError('');
   };
 
-  const handleEditChange = (e) => {
+  const handleEditChange = (e) =>
     setEditForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  };
 
-  // Submit updated book to the API
   const handleSave = async (id) => {
     setEditError('');
     if (!editForm.title.trim() || !editForm.author.trim()) {
       setEditError('Title and author cannot be empty.');
       return;
     }
-
     setSavingId(id);
     try {
       await axios.put(`${API_URL}/${id}`, editForm);
-      // UI updates via Socket.IO "bookUpdated" event received in App.js
       cancelEdit();
     } catch (err) {
       const msg = err.response?.data?.error || 'Failed to update book.';
@@ -64,63 +47,95 @@ function BookList({ books }) {
     }
   };
 
+  /* ── Empty state ─────────────────────────────────────────────────── */
   if (books.length === 0) {
     return (
-      <div style={styles.emptyState}>
-        <p>No books yet — add one above!</p>
-      </div>
+      <section className="rounded-xl border border-dashed border-slate-300 bg-white p-10 text-center">
+        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-xl">
+          📖
+        </div>
+        <p className="text-sm font-medium text-slate-500">No books yet</p>
+        <p className="mt-1 text-xs text-slate-400">Add your first book above to get started.</p>
+      </section>
     );
   }
 
+  /* ── List ─────────────────────────────────────────────────────────── */
   return (
-    <div>
-      <h2 style={styles.heading}>Books ({books.length})</h2>
-      <ul style={styles.list}>
+    <section>
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-base font-semibold text-slate-800">Books</h2>
+        <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-500">
+          {books.length}
+        </span>
+      </div>
+
+      <ul className="flex flex-col gap-2">
         {books.map((book) => (
-          <li key={book.id} style={styles.item}>
+          <li
+            key={book.id}
+            className="group rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-sm transition hover:border-slate-300 hover:shadow-md"
+          >
             {editingId === book.id ? (
-              /* ---- Edit mode ---- */
-              <div style={styles.editRow}>
-                <input
-                  style={styles.input}
-                  name="title"
-                  value={editForm.title}
-                  onChange={handleEditChange}
-                  placeholder="Title"
-                  disabled={savingId === book.id}
-                  autoFocus
-                />
-                <input
-                  style={styles.input}
-                  name="author"
-                  value={editForm.author}
-                  onChange={handleEditChange}
-                  placeholder="Author"
-                  disabled={savingId === book.id}
-                />
-                <div style={styles.editActions}>
+              /* ── Edit mode ──────────────────────────────────────── */
+              <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <input
+                    name="title"
+                    value={editForm.title}
+                    onChange={handleEditChange}
+                    placeholder="Title"
+                    disabled={savingId === book.id}
+                    autoFocus
+                    className="flex-1 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 disabled:opacity-50"
+                  />
+                  <input
+                    name="author"
+                    value={editForm.author}
+                    onChange={handleEditChange}
+                    placeholder="Author"
+                    disabled={savingId === book.id}
+                    className="flex-1 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 disabled:opacity-50"
+                  />
+                </div>
+                <div className="flex items-center gap-2">
                   <button
-                    style={styles.saveBtn}
                     onClick={() => handleSave(book.id)}
                     disabled={savingId === book.id}
+                    className="rounded-lg bg-emerald-600 px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-emerald-700 active:scale-[0.97] disabled:opacity-60"
                   >
                     {savingId === book.id ? 'Saving…' : 'Save'}
                   </button>
-                  <button style={styles.cancelBtn} onClick={cancelEdit}>
+                  <button
+                    onClick={cancelEdit}
+                    className="rounded-lg bg-slate-100 px-4 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-200 active:scale-[0.97]"
+                  >
                     Cancel
                   </button>
+                  {editError && (
+                    <span className="text-xs text-red-500">{editError}</span>
+                  )}
                 </div>
-                {editError && <p style={styles.editError}>{editError}</p>}
               </div>
             ) : (
-              /* ---- Read mode ---- */
-              <div style={styles.readRow}>
-                <div style={styles.bookMeta}>
-                  <span style={styles.bookId}>#{book.id}</span>
-                  <span style={styles.bookTitle}>{book.title}</span>
-                  <span style={styles.bookAuthor}>— {book.author}</span>
+              /* ── Read mode ──────────────────────────────────────── */
+              <div className="flex items-center gap-4">
+                {/* Index badge */}
+                <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md bg-slate-100 text-[11px] font-bold text-slate-400">
+                  {book.id}
+                </span>
+
+                {/* Book info */}
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold text-slate-800">{book.title}</p>
+                  <p className="truncate text-xs text-slate-500">{book.author}</p>
                 </div>
-                <button style={styles.editBtn} onClick={() => startEdit(book)}>
+
+                {/* Edit button — visible on hover (always visible on touch) */}
+                <button
+                  onClick={() => startEdit(book)}
+                  className="flex-shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 opacity-0 shadow-sm transition hover:border-indigo-300 hover:text-indigo-600 group-hover:opacity-100 focus:opacity-100"
+                >
                   Edit
                 </button>
               </div>
@@ -128,116 +143,8 @@ function BookList({ books }) {
           </li>
         ))}
       </ul>
-    </div>
+    </section>
   );
 }
-
-const styles = {
-  heading: {
-    fontSize: '18px',
-    color: '#2c3e50',
-    marginBottom: '12px',
-  },
-  emptyState: {
-    padding: '24px',
-    textAlign: 'center',
-    color: '#999',
-    background: '#fff',
-    borderRadius: '10px',
-    border: '1px dashed #ccc',
-  },
-  list: {
-    listStyle: 'none',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '10px',
-  },
-  item: {
-    background: '#fff',
-    border: '1px solid #dce3ee',
-    borderRadius: '8px',
-    padding: '14px 18px',
-    boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
-  },
-  readRow: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: '12px',
-  },
-  bookMeta: {
-    display: 'flex',
-    alignItems: 'baseline',
-    gap: '8px',
-    flexWrap: 'wrap',
-    flex: 1,
-  },
-  bookId: {
-    color: '#aaa',
-    fontSize: '12px',
-    minWidth: '28px',
-  },
-  bookTitle: {
-    fontWeight: 'bold',
-    color: '#2c3e50',
-    fontSize: '15px',
-  },
-  bookAuthor: {
-    color: '#666',
-    fontSize: '14px',
-  },
-  editBtn: {
-    padding: '5px 14px',
-    background: '#3498db',
-    color: '#fff',
-    border: 'none',
-    borderRadius: '5px',
-    cursor: 'pointer',
-    fontSize: '13px',
-    flexShrink: 0,
-  },
-  editRow: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: '8px',
-    alignItems: 'center',
-  },
-  input: {
-    flex: '1 1 140px',
-    padding: '7px 10px',
-    borderRadius: '5px',
-    border: '1px solid #c5cfe0',
-    fontSize: '14px',
-    outline: 'none',
-  },
-  editActions: {
-    display: 'flex',
-    gap: '6px',
-  },
-  saveBtn: {
-    padding: '7px 14px',
-    background: '#27ae60',
-    color: '#fff',
-    border: 'none',
-    borderRadius: '5px',
-    cursor: 'pointer',
-    fontSize: '13px',
-  },
-  cancelBtn: {
-    padding: '7px 14px',
-    background: '#e74c3c',
-    color: '#fff',
-    border: 'none',
-    borderRadius: '5px',
-    cursor: 'pointer',
-    fontSize: '13px',
-  },
-  editError: {
-    width: '100%',
-    color: '#c0392b',
-    fontSize: '13px',
-    marginTop: '4px',
-  },
-};
 
 export default BookList;

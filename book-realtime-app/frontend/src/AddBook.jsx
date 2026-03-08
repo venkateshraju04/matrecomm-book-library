@@ -1,15 +1,6 @@
 /**
- * src/AddBook.js — Form component for creating a new book.
- *
- * Flow:
- *   1. User fills in title + author and submits.
- *   2. A POST request is sent to the REST API.
- *   3. The backend persists the book, then emits "bookAdded" via Socket.IO.
- *   4. App.js receives "bookAdded" and updates the books list in React state.
- *
- * Note: This component does NOT update state directly after a successful
- * POST — that would cause a duplicate entry.  All state updates happen
- * through the socket listener registered in App.js.
+ * src/AddBook.jsx — Modern card form for adding a new book.
+ * POST -> server emits bookAdded -> App.jsx updates state via socket.
  */
 import React, { useState } from 'react';
 import axios from 'axios';
@@ -17,28 +8,23 @@ import axios from 'axios';
 const API_URL = 'http://localhost:5001/books';
 
 function AddBook() {
-  const [form, setForm]   = useState({ title: '', author: '' });
-  const [error, setError]   = useState('');
+  const [form, setForm]       = useState({ title: '', author: '' });
+  const [error, setError]     = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) => {
+  const handleChange = (e) =>
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-
-    // Client-side validation
     if (!form.title.trim() || !form.author.trim()) {
       setError('Both title and author are required.');
       return;
     }
-
     setLoading(true);
     try {
       await axios.post(API_URL, form);
-      // On success: clear form — UI list updates via Socket.IO event in App.js
       setForm({ title: '', author: '' });
     } catch (err) {
       const msg = err.response?.data?.error || 'Failed to add book. Is the server running?';
@@ -50,81 +36,75 @@ function AddBook() {
   };
 
   return (
-    <div style={styles.card}>
-      <h2 style={styles.heading}>Add a New Book</h2>
-      <form onSubmit={handleSubmit} style={styles.form}>
-        <input
-          style={styles.input}
-          type="text"
-          name="title"
-          placeholder="Book title"
-          value={form.title}
-          onChange={handleChange}
+    <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      {/* Section header */}
+      <div className="mb-5 flex items-center gap-2">
+        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 text-sm">
+          ✏️
+        </span>
+        <h2 className="text-base font-semibold text-slate-800">Add a New Book</h2>
+      </div>
+
+      {/* Form row: stacks on mobile, inline on sm+ */}
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3 sm:flex-row sm:items-end">
+        <div className="flex-1">
+          <label htmlFor="add-title" className="mb-1 block text-xs font-medium text-slate-500">
+            Title
+          </label>
+          <input
+            id="add-title"
+            name="title"
+            type="text"
+            placeholder="e.g. Atomic Habits"
+            value={form.title}
+            onChange={handleChange}
+            disabled={loading}
+            autoComplete="off"
+            className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 placeholder-slate-400 outline-none transition focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100 disabled:opacity-50"
+          />
+        </div>
+
+        <div className="flex-1">
+          <label htmlFor="add-author" className="mb-1 block text-xs font-medium text-slate-500">
+            Author
+          </label>
+          <input
+            id="add-author"
+            name="author"
+            type="text"
+            placeholder="e.g. James Clear"
+            value={form.author}
+            onChange={handleChange}
+            disabled={loading}
+            autoComplete="off"
+            className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 placeholder-slate-400 outline-none transition focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100 disabled:opacity-50"
+          />
+        </div>
+
+        <button
+          type="submit"
           disabled={loading}
-          autoComplete="off"
-        />
-        <input
-          style={styles.input}
-          type="text"
-          name="author"
-          placeholder="Author name"
-          value={form.author}
-          onChange={handleChange}
-          disabled={loading}
-          autoComplete="off"
-        />
-        <button type="submit" style={styles.button} disabled={loading}>
-          {loading ? 'Adding…' : '+ Add Book'}
+          className="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 active:scale-[0.97] disabled:opacity-60 disabled:pointer-events-none"
+        >
+          {loading ? (
+            <>
+              <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+              </svg>
+              Adding…
+            </>
+          ) : (
+            '+ Add Book'
+          )}
         </button>
       </form>
-      {error && <p style={styles.error}>{error}</p>}
-    </div>
+
+      {error && (
+        <p className="mt-3 rounded-md bg-red-50 px-3 py-2 text-xs text-red-600">{error}</p>
+      )}
+    </section>
   );
 }
-
-const styles = {
-  card: {
-    background: '#fff',
-    border: '1px solid #dce3ee',
-    borderRadius: '10px',
-    padding: '20px 24px',
-    marginBottom: '24px',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-  },
-  heading: {
-    fontSize: '18px',
-    color: '#2c3e50',
-    marginBottom: '14px',
-  },
-  form: {
-    display: 'flex',
-    gap: '10px',
-    flexWrap: 'wrap',
-  },
-  input: {
-    flex: '1 1 160px',
-    padding: '9px 12px',
-    borderRadius: '6px',
-    border: '1px solid #c5cfe0',
-    fontSize: '14px',
-    outline: 'none',
-  },
-  button: {
-    padding: '9px 20px',
-    background: '#3498db',
-    color: '#fff',
-    border: 'none',
-    borderRadius: '6px',
-    fontSize: '14px',
-    fontWeight: 'bold',
-    cursor: 'pointer',
-    whiteSpace: 'nowrap',
-  },
-  error: {
-    marginTop: '10px',
-    color: '#c0392b',
-    fontSize: '13px',
-  },
-};
 
 export default AddBook;
