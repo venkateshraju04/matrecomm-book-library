@@ -38,12 +38,14 @@ function App() {
     const onDisconnect  = ()  => setIsConnected(false);
     const onBookAdded   = (b) => { console.log('[socket] bookAdded:', b);   setBooks((p) => [...p, b]); };
     const onBookUpdated = (b) => { console.log('[socket] bookUpdated:', b); setBooks((p) => p.map((x) => (x.id === b.id ? b : x))); };
+    const onBookDeleted = ({ id }) => { console.log('[socket] bookDeleted:', id); setBooks((p) => p.filter((x) => x.id !== id)); };
     const onUsersOnline = (n) => { console.log('[socket] usersOnline:', n); setUsersOnline(n); };
 
     socket.on('connect',     onConnect);
     socket.on('disconnect',  onDisconnect);
     socket.on('bookAdded',   onBookAdded);
     socket.on('bookUpdated', onBookUpdated);
+    socket.on('bookDeleted', onBookDeleted);
     socket.on('usersOnline', onUsersOnline);
 
     return () => {
@@ -51,6 +53,7 @@ function App() {
       socket.off('disconnect',  onDisconnect);
       socket.off('bookAdded',   onBookAdded);
       socket.off('bookUpdated', onBookUpdated);
+      socket.off('bookDeleted', onBookDeleted);
       socket.off('usersOnline', onUsersOnline);
     };
   }, []);

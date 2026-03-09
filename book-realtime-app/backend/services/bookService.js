@@ -46,4 +46,16 @@ const updateBook = (id, { title, author }) => {
   return books[index];
 };
 
-module.exports = { getAllBooks, getBookById, createBook, updateBook };
+/**
+ * Delete a book by id.
+ * @param {number} id
+ * @returns {object|null} The deleted book, or null if not found.
+ */
+const deleteBook = (id) => {
+  const index = books.findIndex((b) => b.id === id);
+  if (index === -1) return null;
+  const [removed] = books.splice(index, 1);
+  return removed;
+};
+
+module.exports = { getAllBooks, getBookById, createBook, updateBook, deleteBook };

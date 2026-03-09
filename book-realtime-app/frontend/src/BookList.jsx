@@ -102,6 +102,23 @@ function BookList({ books, loading }) {
     }
   };
 
+  const handleDelete = async (id) => {
+    setSavingId(id);
+    try {
+      await axios.delete(`${API_URL}/${id}`);
+      socket.emit('stopEditing', { bookId: id });
+      setEditingId(null);
+      setEditForm({ title: '', author: '' });
+      setEditError('');
+    } catch (err) {
+      const msg = err.response?.data?.error || 'Failed to delete book.';
+      console.error('[BookList] DELETE error:', err.message);
+      setEditError(msg);
+    } finally {
+      setSavingId(null);
+    }
+  };
+
   /* ── Skeleton loading ────────────────────────────────────────────── */
   if (loading) {
     return (
@@ -199,6 +216,13 @@ function BookList({ books, loading }) {
                     className="rounded-lg bg-slate-100 px-4 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-200 active:scale-[0.97]"
                   >
                     Cancel
+                  </button>
+                  <button
+                    onClick={() => handleDelete(book.id)}
+                    disabled={savingId === book.id}
+                    className="ml-auto rounded-lg bg-red-50 px-4 py-1.5 text-xs font-semibold text-red-600 transition hover:bg-red-100 active:scale-[0.97] disabled:opacity-60"
+                  >
+                    Delete
                   </button>
                 </div>
                 {editError && (

@@ -18,4 +18,7 @@ router.post('/',    controller.addBook);
 // PUT  /books/:id   → update a book  → emits "bookUpdated" + "activity"
 router.put('/:id',  controller.updateBook);
 
+// DELETE /books/:id → delete a book → emits "bookDeleted" + "activity"
+router.delete('/:id', controller.deleteBook);
+
 module.exports = router;

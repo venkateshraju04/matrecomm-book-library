@@ -92,4 +92,23 @@ const updateBook = (req, res) => {
   res.json(updatedBook);
 };
 
-module.exports = { getBooks, addBook, updateBook };
+// ---------------------------------------------------------------------------
+// DELETE /books/:id — Delete a book, broadcast bookDeleted + activity
+// ---------------------------------------------------------------------------
+const deleteBook = (req, res) => {
+  const id = parseInt(req.params.id, 10);
+
+  const removed = bookService.deleteBook(id);
+  if (!removed) {
+    return res.status(404).json({ error: `Book with id ${id} not found` });
+  }
+
+  const io = req.app.get('io');
+  io.emit('bookDeleted', { id });
+  io.emit('activity', makeActivity('BOOK_DELETED', removed.title));
+
+  console.log(`[controller] Book deleted  → id:${id}  "${removed.title}"`);
+  res.json({ message: 'Deleted', id });
+};
+
+module.exports = { getBooks, addBook, updateBook, deleteBook };

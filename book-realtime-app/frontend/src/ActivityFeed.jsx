@@ -67,14 +67,17 @@ function ActivityFeed() {
           <ul className="flex flex-col">
             {activities.map((act, idx) => {
               const isAdded = act.type === 'BOOK_ADDED';
+              const isDeleted = act.type === 'BOOK_DELETED';
+              const dotColor = isDeleted ? 'bg-red-500' : isAdded ? 'bg-emerald-500' : 'bg-amber-500';
+              const label = isDeleted ? 'Deleted' : isAdded ? 'Added' : 'Updated';
               return (
                 <li
                   key={idx}
                   className="animate-fade-slide-in flex items-center gap-3 border-b border-slate-100/60 py-2.5 last:border-0"
                 >
-                  <span className={`h-1.5 w-1.5 flex-shrink-0 rounded-full ${isAdded ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                  <span className={`h-1.5 w-1.5 flex-shrink-0 rounded-full ${dotColor}`} />
                   <span className="min-w-0 flex-1 truncate text-sm text-slate-600">
-                    {isAdded ? 'Added' : 'Updated'} <span className="font-medium text-slate-800">{act.title}</span>
+                    {label} <span className="font-medium text-slate-800">{act.title}</span>
                   </span>
                   <time className="flex-shrink-0 text-[11px] tabular-nums text-slate-400">
                     {formatTime(act.timestamp)}
