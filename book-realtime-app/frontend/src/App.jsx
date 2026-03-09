@@ -10,9 +10,8 @@ import socket from './socket';
 import BookList from './BookList';
 import AddBook from './AddBook';
 import ActivityFeed from './ActivityFeed';
-import StatusCard from './StatusCard';
 
-const API_URL = 'http://localhost:5001/books';
+const API_URL = `http://${window.location.hostname}:5001/books`;
 
 function App() {
   const [books, setBooks]             = useState([]);
@@ -60,7 +59,7 @@ function App() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30">
       {/* ── Sticky top bar ──────────────────────────────────────────── */}
       <header className="sticky top-0 z-30 border-b border-slate-200/70 bg-white/80 backdrop-blur-lg">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
+        <div className="mx-auto flex items-center justify-between px-6 py-3 lg:px-10">
           {/* Logo */}
           <div className="flex items-center gap-2.5">
             <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600 text-lg text-white shadow-sm">
@@ -98,7 +97,7 @@ function App() {
       </header>
 
       {/* ── Main content ────────────────────────────────────────────── */}
-      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+      <main className="mx-auto px-6 py-8 lg:px-10">
         {fetchError && (
           <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             {fetchError}
@@ -106,16 +105,15 @@ function App() {
         )}
 
         {/* Two-column grid — stacks on mobile */}
-        <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
+        <div className="grid gap-8 lg:grid-cols-[1fr_480px]">
           {/* Left column: form + book list */}
           <div className="flex flex-col gap-8">
             <AddBook />
             <BookList books={books} loading={loading} />
           </div>
 
-          {/* Right sidebar: status + activity */}
+          {/* Right sidebar: activity */}
           <aside className="flex flex-col gap-8">
-            <StatusCard isConnected={isConnected} usersOnline={usersOnline} booksCount={books.length} />
             <ActivityFeed />
           </aside>
         </div>

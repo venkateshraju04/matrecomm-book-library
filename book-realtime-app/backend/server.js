@@ -36,7 +36,7 @@ const server = http.createServer(app);
 // ---------------------------------------------------------------------------
 const io = new Server(server, {
   cors: {
-    origin: 'http://localhost:5173',
+    origin: '*',
     methods: ['GET', 'POST', 'PUT'],
   },
 });
@@ -44,7 +44,7 @@ const io = new Server(server, {
 // ---------------------------------------------------------------------------
 // Express middleware
 // ---------------------------------------------------------------------------
-app.use(cors({ origin: 'http://localhost:5173' }));
+app.use(cors());
 app.use(express.json());
 
 // Share io so controllers (called during request handling) can emit events
@@ -67,7 +67,7 @@ initSocketHandler(io);
 // Start server
 // ---------------------------------------------------------------------------
 const PORT = process.env.PORT || 5001;
-server.listen(PORT, () => {
-  console.log(`\n🚀 Backend listening at http://localhost:${PORT}`);
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`\n🚀 Backend listening at http://0.0.0.0:${PORT}`);
   console.log('   Waiting for client connections…\n');
 });

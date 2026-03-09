@@ -5,7 +5,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5001/books';
+const API_URL = `http://${window.location.hostname}:5001/books`;
 
 function AddBook() {
   const [form, setForm]       = useState({ title: '', author: '' });

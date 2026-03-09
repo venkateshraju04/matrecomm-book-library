@@ -45,7 +45,7 @@ function ActivityFeed() {
       </div>
 
       {/* Feed body — scrollable */}
-      <div className="custom-scrollbar max-h-72 overflow-y-auto px-5 py-3">
+      <div className="custom-scrollbar h-[440px] overflow-y-auto px-5 py-3">
         {activities.length === 0 ? (
           <p className="py-6 text-center text-xs text-slate-400">
             No activity yet — add or edit a book to see events here.
@@ -53,26 +53,16 @@ function ActivityFeed() {
         ) : (
           <ul className="flex flex-col">
             {activities.map((act, idx) => {
-              const meta = EVENT_META[act.type] || { icon: '🔔', label: act.type, color: 'bg-slate-50 text-slate-600' };
+              const isAdded = act.type === 'BOOK_ADDED';
               return (
                 <li
                   key={idx}
-                  className="animate-fade-slide-in flex items-start gap-3 rounded-lg border-b border-slate-50 py-3 px-1 last:border-0 transition-colors duration-150 hover:bg-slate-50/60"
+                  className="animate-fade-slide-in flex items-center gap-3 border-b border-slate-100/60 py-2.5 last:border-0"
                 >
-                  {/* Icon */}
-                  <span className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-sm shadow-sm ${meta.color}`}>
-                    {meta.icon}
+                  <span className={`h-1.5 w-1.5 flex-shrink-0 rounded-full ${isAdded ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                  <span className="min-w-0 flex-1 truncate text-sm text-slate-600">
+                    {isAdded ? 'Added' : 'Updated'} <span className="font-medium text-slate-800">{act.title}</span>
                   </span>
-
-                  {/* Description */}
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm text-slate-700">
-                      <span className="font-medium">{meta.label}:</span>{' '}
-                      {act.title}
-                    </p>
-                  </div>
-
-                  {/* Timestamp */}
                   <time className="flex-shrink-0 text-[11px] tabular-nums text-slate-400">
                     {formatTime(act.timestamp)}
                   </time>

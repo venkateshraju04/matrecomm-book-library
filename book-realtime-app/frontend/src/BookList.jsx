@@ -2,24 +2,76 @@
  * src/BookList.jsx — Linear/GitHub-style book list with inline editing.
  * All real-time updates come through socket events handled by App.jsx.
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import socket from './socket';
 
-const API_URL = 'http://localhost:5001/books';
+const API_URL = `http://${window.location.hostname}:5001/books`;
 
 function BookList({ books, loading }) {
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm]   = useState({ title: '', author: '' });
   const [editError, setEditError] = useState('');
   const [savingId, setSavingId]   = useState(null);
+  // Soft-lock state: { [bookId]: "User X" } — books locked by OTHER users
+  const [locks, setLocks]         = useState({});
+
+  /* ── Listen for lock/unlock events from other users ──────────────── */
+  useEffect(() => {
+    const onCurrentLocks = (lockMap) => {
+      // lockMap: { bookId: { socketId, userName } }
+      const mapped = {};
+      for (const [bookId, lock] of Object.entries(lockMap)) {
+        mapped[bookId] = lock.userName;
+      }
+      setLocks(mapped);
+    };
+    const onBookLocked = ({ bookId, userName }) => {
+      setLocks((prev) => ({ ...prev, [bookId]: userName }));
+    };
+    const onBookUnlocked = ({ bookId }) => {
+      setLocks((prev) => {
+        const next = { ...prev };
+        delete next[bookId];
+        return next;
+      });
+    };
+
+    // Server tells us our own lock expired
+    const onLockExpired = ({ bookId }) => {
+      setEditingId((cur) => (cur === Number(bookId) || cur === bookId ? null : cur));
+      setEditForm({ title: '', author: '' });
+      setEditError('');
+    };
+
+    socket.on('currentLocks', onCurrentLocks);
+    socket.on('bookLocked', onBookLocked);
+    socket.on('bookUnlocked', onBookUnlocked);
+    socket.on('lockExpired', onLockExpired);
+
+    return () => {
+      socket.off('currentLocks', onCurrentLocks);
+      socket.off('bookLocked', onBookLocked);
+      socket.off('bookUnlocked', onBookUnlocked);
+      socket.off('lockExpired', onLockExpired);
+    };
+  }, []);
 
   const startEdit = (book) => {
+    // Release lock on the previously edited book (if any) before locking the new one
+    if (editingId != null && editingId !== book.id) {
+      socket.emit('stopEditing', { bookId: editingId });
+    }
     setEditingId(book.id);
     setEditForm({ title: book.title, author: book.author });
     setEditError('');
+    socket.emit('startEditing', { bookId: book.id });
   };
 
   const cancelEdit = () => {
+    if (editingId != null) {
+      socket.emit('stopEditing', { bookId: editingId });
+    }
     setEditingId(null);
     setEditForm({ title: '', author: '' });
     setEditError('');
@@ -37,7 +89,10 @@ function BookList({ books, loading }) {
     setSavingId(id);
     try {
       await axios.put(`${API_URL}/${id}`, editForm);
-      cancelEdit();
+      socket.emit('stopEditing', { bookId: id });
+      setEditingId(null);
+      setEditForm({ title: '', author: '' });
+      setEditError('');
     } catch (err) {
       const msg = err.response?.data?.error || 'Failed to update book.';
       console.error('[BookList] PUT error:', err.message);
@@ -155,16 +210,37 @@ function BookList({ books, loading }) {
                   <p className="truncate text-xs text-slate-500">{book.author}</p>
                 </div>
 
-                {/* Edit button — visible on hover (always visible on touch) */}
-                <button
-                  onClick={() => startEdit(book)}
-                  className="flex-shrink-0 inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 opacity-0 shadow-sm transition-all duration-200 hover:border-indigo-300 hover:text-indigo-600 hover:shadow-md hover:-translate-y-0.5 group-hover:opacity-100 focus:opacity-100"
-                >
-                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-                  </svg>
-                  Edit
-                </button>
+                {/* Edit button / Lock indicator */}
+                {locks[book.id] ? (
+                  /* ── Locked by another user ── */
+                  <div className="relative flex-shrink-0 group/lock">
+                    <button
+                      disabled
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-orange-200 bg-orange-50 px-3 py-1.5 text-xs font-medium text-orange-400 cursor-not-allowed"
+                    >
+                      <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+                      </svg>
+                      Editing
+                    </button>
+                    {/* Tooltip */}
+                    <div className="pointer-events-none absolute bottom-full right-0 mb-2 w-max max-w-[200px] rounded-lg bg-slate-800 px-3 py-1.5 text-[11px] font-medium text-white opacity-0 shadow-lg transition-opacity duration-150 group-hover/lock:opacity-100">
+                      A user is currently editing this
+                      <div className="absolute -bottom-1 right-4 h-2 w-2 rotate-45 bg-slate-800" />
+                    </div>
+                  </div>
+                ) : (
+                  /* ── Normal edit button — visible on hover ── */
+                  <button
+                    onClick={() => startEdit(book)}
+                    className="flex-shrink-0 inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 opacity-0 shadow-sm transition-all duration-200 hover:border-indigo-300 hover:text-indigo-600 hover:shadow-md hover:-translate-y-0.5 group-hover:opacity-100 focus:opacity-100"
+                  >
+                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                    </svg>
+                    Edit
+                  </button>
+                )}
               </div>
             )}
           </li>
