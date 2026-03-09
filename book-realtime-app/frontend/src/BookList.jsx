@@ -109,17 +109,17 @@ function BookList({ books, loading }) {
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-base font-semibold text-slate-800">Books</h2>
         </div>
-        <ul className="flex flex-col gap-2">
-          {[1, 2, 3].map((i) => (
-            <li key={i} className="flex items-center gap-4 rounded-xl border border-slate-100 bg-white px-5 py-4">
-              <div className="h-10 w-10 flex-shrink-0 animate-pulse rounded-full bg-slate-200" />
-              <div className="flex-1 space-y-2">
-                <div className="h-3.5 w-3/5 animate-pulse rounded-md bg-slate-200" />
-                <div className="h-3 w-2/5 animate-pulse rounded-md bg-slate-100" />
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="overflow-hidden rounded-xl border border-slate-100 bg-white">
+              <div className="aspect-[4/3] animate-pulse bg-slate-200" />
+              <div className="space-y-2 p-4">
+                <div className="h-3.5 w-3/4 animate-pulse rounded-md bg-slate-200" />
+                <div className="h-3 w-1/2 animate-pulse rounded-md bg-slate-100" />
               </div>
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
       </section>
     );
   }
@@ -137,7 +137,20 @@ function BookList({ books, loading }) {
     );
   }
 
-  /* ── List ─────────────────────────────────────────────────────────── */
+  /* ── Card grid ────────────────────────────────────────────────────── */
+
+  const GRADIENTS = [
+    'from-indigo-500 to-purple-600',
+    'from-emerald-500 to-teal-600',
+    'from-rose-500 to-pink-600',
+    'from-amber-500 to-orange-600',
+    'from-sky-500 to-cyan-600',
+    'from-violet-500 to-fuchsia-600',
+  ];
+
+  const getInitials = (title) =>
+    title.trim().slice(0, 2).toUpperCase();
+
   return (
     <section>
       <div className="mb-4 flex items-center justify-between">
@@ -147,34 +160,32 @@ function BookList({ books, loading }) {
         </span>
       </div>
 
-      <ul className="flex flex-col gap-2">
-        {books.map((book) => (
-          <li
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        {books.map((book, idx) => (
+          <div
             key={book.id}
-            className="group rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-sm transition-all duration-200 hover:border-slate-300 hover:shadow-md hover:bg-slate-50/50"
+            className="group relative overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
           >
             {editingId === book.id ? (
               /* ── Edit mode ──────────────────────────────────────── */
-              <div className="flex flex-col gap-3">
-                <div className="flex flex-col gap-2 sm:flex-row">
-                  <input
-                    name="title"
-                    value={editForm.title}
-                    onChange={handleEditChange}
-                    placeholder="Title"
-                    disabled={savingId === book.id}
-                    autoFocus
-                    className="flex-1 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 disabled:opacity-50"
-                  />
-                  <input
-                    name="author"
-                    value={editForm.author}
-                    onChange={handleEditChange}
-                    placeholder="Author"
-                    disabled={savingId === book.id}
-                    className="flex-1 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 disabled:opacity-50"
-                  />
-                </div>
+              <div className="p-4 flex flex-col gap-3">
+                <input
+                  name="title"
+                  value={editForm.title}
+                  onChange={handleEditChange}
+                  placeholder="Title"
+                  disabled={savingId === book.id}
+                  autoFocus
+                  className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 disabled:opacity-50"
+                />
+                <input
+                  name="author"
+                  value={editForm.author}
+                  onChange={handleEditChange}
+                  placeholder="Author"
+                  disabled={savingId === book.id}
+                  className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 disabled:opacity-50"
+                />
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => handleSave(book.id)}
@@ -189,63 +200,62 @@ function BookList({ books, loading }) {
                   >
                     Cancel
                   </button>
-                  {editError && (
-                    <span className="text-xs text-red-500">{editError}</span>
-                  )}
                 </div>
+                {editError && (
+                  <span className="text-xs text-red-500">{editError}</span>
+                )}
               </div>
             ) : (
               /* ── Read mode ──────────────────────────────────────── */
-              <div className="flex items-center gap-4">
-                {/* Avatar */}
-                <img
-                  src={`https://ui-avatars.com/api/?name=${encodeURIComponent(book.title)}&background=6366f1&color=fff&size=40&rounded=true&bold=true`}
-                  alt=""
-                  className="h-10 w-10 flex-shrink-0 rounded-full shadow-sm"
-                />
-
-                {/* Book info */}
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-slate-800">{book.title}</p>
-                  <p className="truncate text-xs text-slate-500">{book.author}</p>
+              <>
+                {/* Cover */}
+                <div className={`flex aspect-[4/3] items-center justify-center bg-gradient-to-br ${GRADIENTS[idx % GRADIENTS.length]}`}>
+                  <span className="text-4xl font-bold text-white/90 select-none">
+                    {getInitials(book.title)}
+                  </span>
                 </div>
 
-                {/* Edit button / Lock indicator */}
-                {locks[book.id] ? (
-                  /* ── Locked by another user ── */
-                  <div className="relative flex-shrink-0 group/lock">
+                {/* Info */}
+                <div className="p-4">
+                  <p className="truncate text-sm font-semibold text-slate-800">{book.title}</p>
+                  <p className="mt-0.5 truncate text-xs text-slate-500">{book.author}</p>
+                </div>
+
+                {/* Edit / Lock overlay — bottom-right */}
+                <div className="absolute bottom-3 right-3">
+                  {locks[book.id] ? (
+                    <div className="relative group/lock">
+                      <button
+                        disabled
+                        className="inline-flex items-center gap-1 rounded-lg border border-orange-200 bg-orange-50 px-2.5 py-1 text-[11px] font-medium text-orange-400 cursor-not-allowed shadow-sm"
+                      >
+                        <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+                        </svg>
+                        Editing
+                      </button>
+                      <div className="pointer-events-none absolute bottom-full right-0 mb-2 w-max max-w-[180px] rounded-lg bg-slate-800 px-3 py-1.5 text-[11px] font-medium text-white opacity-0 shadow-lg transition-opacity duration-150 group-hover/lock:opacity-100">
+                        {locks[book.id]} is currently editing this
+                        <div className="absolute -bottom-1 right-4 h-2 w-2 rotate-45 bg-slate-800" />
+                      </div>
+                    </div>
+                  ) : (
                     <button
-                      disabled
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-orange-200 bg-orange-50 px-3 py-1.5 text-xs font-medium text-orange-400 cursor-not-allowed"
+                      onClick={() => startEdit(book)}
+                      className="inline-flex items-center gap-1 rounded-lg border border-white/40 bg-white/80 px-2.5 py-1 text-[11px] font-medium text-slate-700 opacity-0 shadow-sm backdrop-blur-sm transition-all duration-200 hover:bg-white hover:text-indigo-600 hover:shadow-md group-hover:opacity-100 focus:opacity-100"
                     >
                       <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
                       </svg>
-                      Editing
+                      Edit
                     </button>
-                    {/* Tooltip */}
-                    <div className="pointer-events-none absolute bottom-full right-0 mb-2 w-max max-w-[200px] rounded-lg bg-slate-800 px-3 py-1.5 text-[11px] font-medium text-white opacity-0 shadow-lg transition-opacity duration-150 group-hover/lock:opacity-100">
-                      A user is currently editing this
-                      <div className="absolute -bottom-1 right-4 h-2 w-2 rotate-45 bg-slate-800" />
-                    </div>
-                  </div>
-                ) : (
-                  /* ── Normal edit button — visible on hover ── */
-                  <button
-                    onClick={() => startEdit(book)}
-                    className="flex-shrink-0 inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 opacity-0 shadow-sm transition-all duration-200 hover:border-indigo-300 hover:text-indigo-600 hover:shadow-md hover:-translate-y-0.5 group-hover:opacity-100 focus:opacity-100"
-                  >
-                    <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-                    </svg>
-                    Edit
-                  </button>
-                )}
-              </div>
+                  )}
+                </div>
+              </>
             )}
-          </li>
+          </div>
         ))}
-      </ul>
+      </div>
     </section>
   );
 }

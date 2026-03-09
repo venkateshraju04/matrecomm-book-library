@@ -105,7 +105,7 @@ function App() {
         )}
 
         {/* Two-column grid — stacks on mobile */}
-        <div className="grid gap-8 lg:grid-cols-[1fr_480px]">
+        <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
           {/* Left column: form + book list */}
           <div className="flex flex-col gap-8">
             <AddBook />

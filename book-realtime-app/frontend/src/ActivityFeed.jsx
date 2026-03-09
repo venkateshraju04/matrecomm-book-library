@@ -14,6 +14,7 @@ const EVENT_META = {
 
 function ActivityFeed() {
   const [activities, setActivities] = useState([]);
+  const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
     const onActivity = (event) => {
@@ -37,15 +38,27 @@ function ActivityFeed() {
           </span>
           <h2 className="text-sm font-semibold text-slate-800">Recent Activity</h2>
         </div>
-        {activities.length > 0 && (
-          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
-            {activities.length}
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {activities.length > 0 && (
+            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
+              {activities.length}
+            </span>
+          )}
+          <button
+            onClick={() => setCollapsed((c) => !c)}
+            className="flex h-6 w-6 items-center justify-center rounded-md text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+            aria-label={collapsed ? 'Expand activity feed' : 'Collapse activity feed'}
+          >
+            <svg className={`h-4 w-4 transition-transform duration-200 ${collapsed ? '' : 'rotate-180'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+            </svg>
+          </button>
+        </div>
       </div>
 
-      {/* Feed body — scrollable */}
-      <div className="custom-scrollbar h-[440px] overflow-y-auto px-5 py-3">
+      {/* Feed body — scrollable, collapsible */}
+      {!collapsed && (
+      <div className="custom-scrollbar h-[280px] overflow-y-auto px-4 py-2">
         {activities.length === 0 ? (
           <p className="py-6 text-center text-xs text-slate-400">
             No activity yet — add or edit a book to see events here.
@@ -72,6 +85,7 @@ function ActivityFeed() {
           </ul>
         )}
       </div>
+      )}
     </section>
   );
 }
