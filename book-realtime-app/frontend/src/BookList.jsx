@@ -126,7 +126,7 @@ function BookList({ books, loading }) {
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-base font-semibold text-slate-800">Books</h2>
         </div>
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4">
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="overflow-hidden rounded-xl border border-slate-100 bg-white">
               <div className="aspect-[4/3] animate-pulse bg-slate-200" />
@@ -177,7 +177,7 @@ function BookList({ books, loading }) {
         </span>
       </div>
 
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4">
         {books.map((book, idx) => (
           <div
             key={book.id}

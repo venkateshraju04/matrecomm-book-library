@@ -76,10 +76,10 @@ function ActivityFeed() {
                   className="animate-fade-slide-in flex items-center gap-3 border-b border-slate-100/60 py-2.5 last:border-0"
                 >
                   <span className={`h-1.5 w-1.5 flex-shrink-0 rounded-full ${dotColor}`} />
-                  <span className="min-w-0 flex-1 truncate text-sm text-slate-600">
+                  <span className="min-w-0 flex-1 truncate text-[11px] text-slate-600 lg:text-sm">
                     {label} <span className="font-medium text-slate-800">{act.title}</span>
                   </span>
-                  <time className="flex-shrink-0 text-[11px] tabular-nums text-slate-400">
+                  <time className="flex-shrink-0 text-[9px] tabular-nums text-slate-400 lg:text-[11px]">
                     {formatTime(act.timestamp)}
                   </time>
                 </li>
