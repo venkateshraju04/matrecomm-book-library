@@ -58,7 +58,7 @@ function ActivityFeed() {
 
       {/* Feed body — scrollable, collapsible */}
       {!collapsed && (
-      <div className="custom-scrollbar h-[280px] overflow-y-auto px-4 py-2">
+      <div className="custom-scrollbar h-[160px] overflow-y-auto px-4 py-2">
         {activities.length === 0 ? (
           <p className="py-6 text-center text-xs text-slate-400">
             No activity yet — add or edit a book to see events here.

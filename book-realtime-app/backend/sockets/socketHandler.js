@@ -22,7 +22,7 @@ let connectedUsers = 0;
 // Tracks which book is being edited by whom so we can broadcast lock state.
 // Locks auto-expire after LOCK_TIMEOUT_MS to prevent stale locks.
 // ---------------------------------------------------------------------------
-const LOCK_TIMEOUT_MS = 30_000; // 30 seconds
+const LOCK_TIMEOUT_MS = 15_000; // 15 seconds
 const editLocks = new Map();
 
 /**

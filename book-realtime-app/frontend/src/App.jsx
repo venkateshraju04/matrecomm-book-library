@@ -97,26 +97,21 @@ function App() {
       </header>
 
       {/* ── Main content ────────────────────────────────────────────── */}
-      <main className="mx-auto px-6 py-8 lg:px-10">
+      <main className="mx-auto max-w-6xl px-6 py-8">
         {fetchError && (
           <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             {fetchError}
           </div>
         )}
 
-        {/* Two-column grid — stacks on mobile */}
-        <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
-          {/* Left column: form + book list */}
-          <div className="flex flex-col gap-8">
-            <AddBook />
-            <BookList books={books} loading={loading} />
-          </div>
-
-          {/* Right sidebar: activity */}
-          <aside className="flex flex-col gap-8">
-            <ActivityFeed />
-          </aside>
+        {/* Top row: Add Book + Activity Feed side by side */}
+        <div className="mb-8 grid gap-6 lg:grid-cols-2">
+          <AddBook />
+          <ActivityFeed />
         </div>
+
+        {/* Books grid — centered */}
+        <BookList books={books} loading={loading} />
       </main>
     </div>
   );
