@@ -45,6 +45,11 @@ const initSocketHandler = (io) => {
     }
     socket.emit('currentLocks', currentLocks);
 
+    // Let client re-request the count if it missed the initial emit
+    socket.on('requestUsersOnline', () => {
+      socket.emit('usersOnline', connectedUsers);
+    });
+
     // -----------------------------------------------------------------------
     // Soft-lock: a client starts editing a book
     // -----------------------------------------------------------------------

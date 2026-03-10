@@ -48,6 +48,13 @@ function App() {
     socket.on('bookDeleted', onBookDeleted);
     socket.on('usersOnline', onUsersOnline);
 
+    // If socket already connected before listeners registered (race condition in Safari),
+    // sync state and request current data we may have missed.
+    if (socket.connected) {
+      setIsConnected(true);
+      socket.emit('requestUsersOnline');
+    }
+
     return () => {
       socket.off('connect',     onConnect);
       socket.off('disconnect',  onDisconnect);
