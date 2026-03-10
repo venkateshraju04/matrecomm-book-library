@@ -11,7 +11,9 @@
  */
 import { io } from 'socket.io-client';
 
-const socket = io(`http://${window.location.hostname}:5001`, {
+const SOCKET_URL = import.meta.env.VITE_API_URL || '';
+
+const socket = io(SOCKET_URL, {
   reconnectionAttempts: 5,
   reconnectionDelay: 1000,
 });

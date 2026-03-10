@@ -1,0 +1,17 @@
+{
+  "name": "book-realtime-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Real-time book management app — Express + Socket.IO + React",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "install:all": "cd backend && npm install && cd ../frontend && npm install",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build",
+    "start": "cd backend && npm start",
+    "postinstall": "npm run install:all"
+  }
+}
