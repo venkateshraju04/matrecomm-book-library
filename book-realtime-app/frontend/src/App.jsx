@@ -11,7 +11,7 @@ import BookList from './BookList';
 import AddBook from './AddBook';
 import ActivityFeed from './ActivityFeed';
 
-const API_URL = `http://${window.location.hostname}:5001/books`;
+const API_URL = `${import.meta.env.VITE_API_URL || ''}/books`;
 
 function App() {
   const [books, setBooks]             = useState([]);

@@ -6,7 +6,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import socket from './socket';
 
-const API_URL = `http://${window.location.hostname}:5001/books`;
+const API_URL = `${import.meta.env.VITE_API_URL || ''}/books`;
 
 function BookList({ books, loading }) {
   const [editingId, setEditingId] = useState(null);
