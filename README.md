@@ -18,7 +18,7 @@ A full-stack real-time book management application built with **React**, **Expre
 - [WebSocket Connection Handling](#websocket-connection-handling)
 - [Deployment Plan](#deployment-plan)
 - [Troubleshooting](#troubleshooting)
-
+- [Monitoring and Post-Deployment Checks](#monitoring-and-post-deployment-checks)
 ---
 
 ## Project Overview
@@ -375,3 +375,46 @@ The frontend automatically uses `window.location.hostname` for API and socket UR
 | Edits not saving / lock stuck | Lock expired (15s timeout) | The lock auto-releases. Start editing again to re-acquire. |
 | Changes not appearing on phone | Phone can't reach localhost | Start frontend with `npm run dev -- --host` and use the machine's LAN IP. |
 | Tailwind styles not applied | Missing plugin | Run `npm install` in frontend; verify `vite.config.js` includes `tailwindcss()`. |
+
+---
+
+## Monitoring and Post-Deployment Checks
+
+After deploying the application, several checks are performed to ensure that the real-time communication system works reliably.
+
+### Runtime Monitoring
+
+The backend logs key Socket.IO lifecycle events:
+
+- client connections
+- client disconnections
+- reconnection attempts
+- connection errors
+
+These logs help detect issues with WebSocket connectivity or unexpected client drops.
+
+Example events monitored:
+
+- `connect`
+- `disconnect`
+- `connect_error`
+- `reconnect_attempt`
+
+### Deployment Platform Logs
+
+The application is deployed on Railway, which provides runtime logs for the Node.js server. These logs allow monitoring of:
+
+- server startup
+- WebSocket connections
+- API request errors
+- unexpected crashes
+
+### Post-Deployment Verification
+
+After deployment, the following checks were performed:
+
+1. Open the application in multiple browser tabs.
+2. Add or edit a book in one tab.
+3. Confirm that updates appear instantly on other tabs.
+4. Verify that the connected users counter updates when tabs are opened or closed.
+5. Confirm that WebSocket reconnection restores the live connection after temporary network interruption.
