@@ -253,12 +253,8 @@ book-realtime-app/
 
 > **macOS note:** Port 5000 is reserved by AirPlay Receiver on macOS Monterey+. This project uses port 5001 to avoid that conflict.
 
-### 1. Clone the repository
+### 1. Extract the .zip file
 
-```bash
-git clone https://github.com/venkateshraju04/matrecomm-book-library.git
-cd matrecomm-book-library/book-realtime-app
-```
 
 ### 2. Install and start the backend
 
